@@ -1,27 +1,18 @@
-name: Playwright Tests
+name: Trigger Playwright Automation
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
-  test:
-    timeout-minutes: 60
+  trigger:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Send repository_dispatch to Playwright repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.PLAYWRIGHT_TRIGGER_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.everest-preview+json" \
+            https://api.github.com/repos/Parkland-Corporation-CEP/qa-automation-tests/dispatches \
+            -d '{"event_type": "run-tests"}'
