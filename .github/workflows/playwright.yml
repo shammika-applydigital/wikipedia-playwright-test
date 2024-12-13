@@ -1,7 +1,7 @@
 name: Trigger Playwright Automation
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   trigger:
@@ -16,3 +16,22 @@ jobs:
             -H "Accept: application/vnd.github.everest-preview+json" \
             https://api.github.com/repos/Parkland-Corporation-CEP/qa-automation-tests/dispatches \
             -d '{"event_type": "run-tests"}'
+
+      - name: Wait for Playwright workflow to finish
+        uses: jakejarvis/wait-for-gh-action@v1
+        with:
+          owner: Parkland-Corporation-CEP
+          repo: qa-automation-tests
+          ref: main
+          token: ${{ secrets.PLAYWRIGHT_TRIGGER_TOKEN }}
+          workflow: Playwright Tests # Name of the workflow in the Playwright repo
+
+      - name: Download Playwright Test Results
+        env:
+          GITHUB_TOKEN: ${{ secrets.PLAYWRIGHT_TRIGGER_TOKEN }}
+        run: |
+          curl -L -o playwright-report.zip \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/Parkland-Corporation-CEP/qa-automation-tests/actions/artifacts # URL for downloading artifacts
+          unzip playwright-report.zip -d playwright-results
+          cat playwright-results/index.html # Example to preview the results in CI
