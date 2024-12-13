@@ -31,7 +31,7 @@ jobs:
           token: ${{ secrets.PLAYWRIGHT_TRIGGER_TOKEN }}
 
       # Step 3: Download Test Artifacts
-      - name: Download Playwright Test Results
+      - name: Download Playwright Test Result
         env:
           GITHUB_TOKEN: ${{ secrets.PLAYWRIGHT_TRIGGER_TOKEN }}
         run: |
